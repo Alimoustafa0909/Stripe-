@@ -8,8 +8,7 @@
     <style>
         body, html {
             height: 100%;
-            margin: 40px;
-
+            margin: 300px;
             justify-content: center;
             align-items: center;
             background-color: #f0f0f0; /* Optional background color */

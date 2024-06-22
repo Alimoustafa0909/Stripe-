@@ -20,7 +20,7 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $productId = 'prod_QKm99TDT8AFm9Q'; // Replace with the actual product ID that you want to show
+        $productId = 'prod_QL3ZoAxSMWexQK'; // Replace with the actual product ID that you want to show
         $intent = SetupIntent::create();
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
