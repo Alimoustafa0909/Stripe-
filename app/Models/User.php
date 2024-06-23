@@ -47,4 +47,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function paymentMethods()
+    {
+        return $this->hasMany(PaymentMethod::class);
+    }
+
+    public function defaultPaymentMethod()
+    {
+        return $this->hasOne(PaymentMethod::class)->where('default', true);
+    }
 }

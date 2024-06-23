@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\PaymentMethod;
 use App\Models\Plan;
 use Laravel\Cashier\Events\WebhookReceived;
 use App\Models\Product;
@@ -9,7 +10,7 @@ use App\Models\Product;
 class StripeEventListener
 {
     /**
-     * Handle received Stripe webhooks.
+     * Handle received stripe webhooks.
      */
     public function handle(WebhookReceived $event): void
     {
@@ -24,12 +25,12 @@ class StripeEventListener
             $product->name = $productData['name'];
             $product->description = $productData['description'];
             // $product->image = $productData['images'];
-            $product->stripe_product_id = $productData['id']; // Stripe product ID
+            $product->stripe_product_id = $productData['id']; // stripe product ID
             // Other fields as needed
             $product->save();
         } elseif ($payload['type'] === 'product.deleted') {
             $stripeProductId = $productData['id'];
-            // Find the product by its Stripe product ID and delete it
+            // Find the product by its stripe product ID and delete it
             $product = Product::where('stripe_product_id', $stripeProductId)->first();
 
             if ($product) {
@@ -38,7 +39,7 @@ class StripeEventListener
 
         } elseif ($payload['type'] === 'product.updated') {
             $stripeProductId = $productData['id'];
-            // Find the product by its Stripe product ID
+            // Find the product by its stripe product ID
             $product = Product::where('stripe_product_id', $stripeProductId)->first();
 
             if ($product) {
@@ -54,7 +55,7 @@ class StripeEventListener
 
             $plan->product_id = Product::where('stripe_product_id', $productData['product'])->first()->id;
             $plan->name = $productData['nickname'];
-            $plan->stripe_product_id = $productData['product']; // Stripe product ID
+            $plan->stripe_product_id = $productData['product']; // stripe product ID
             $plan->stripe_plan_id = $productData['id'];
             $plan->currency = $productData['currency'];
             $plan->amount = $productData['unit_amount'];
@@ -76,14 +77,22 @@ class StripeEventListener
             }
         } elseif ($payload['type'] === 'price.deleted') {
             $stripePlanId = $productData['id'];
-            // Find the product by its Stripe product ID and delete it
+            // Find the product by its stripe product ID and delete it
             $plan = Plan::where('stripe_plan_id', $stripePlanId)->first();
 
             if ($plan) {
                 $plan->delete();
             }
 
+        }elseif ($payload['type'] === 'payment_method.attached') {
+            $payment = new PaymentMethod();
+            $payment->stripe_payment_method_id= $productData['id'];
+            $payment->pm_type= $productData['card']['brand'];
+            $payment->pm_last_four= $productData['card']['last4'];
+            $payment->expires_at= $productData['card']['exp_year'];
+            $payment->save();
+
         }
-        // You can add more conditions based on different webhook types
+            // You can add more conditions based on different webhook types
     }
 }

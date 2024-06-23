@@ -2,16 +2,13 @@
 
 
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Stripe;
 
-use App\Models\Plan;
+use App\Http\Controllers\Controller;
 use App\Models\Product;
-use http\Message;
 use Illuminate\Http\Request;
-use Stripe\Stripe;
 use Stripe\SetupIntent;
-use App\Models\User;
-use function Laravel\Prompts\error;
+use Stripe\Stripe;
 
 class SubscriptionController extends Controller
 {
@@ -20,7 +17,7 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $productId = 'prod_QL3ZoAxSMWexQK'; // Replace with the actual product ID that you want to show
+        $productId = 'prod_QLU2tSkfq0G6qV'; // Replace with the actual product ID that you want to show
         $intent = SetupIntent::create();
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
@@ -32,19 +29,20 @@ class SubscriptionController extends Controller
 
         $clientSecret = $intent->client_secret;
 
-        return view('subscription', compact('clientSecret', 'product'));
+        return view('stripe.subscription', compact('clientSecret', 'product'));
     }
 
     public function subscribe(Request $request)
     {
         $user = auth()->user();
+
         $paymentMethod = $request->payment_method;
         $plan = $request->input('plan');
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
         // Attach the payment method to the user
-        $user->createOrGetStripeCustomer();/*This Function ensures that the authenticated user has a corresponding customer record in Stripe.
+        $user->createOrGetStripeCustomer();/*This Function ensures that the authenticated user has a corresponding customer record in stripe.
     if not he make a record for this user */
         $user->updateDefaultPaymentMethod($paymentMethod);//if the payment method of the user has been changed
 

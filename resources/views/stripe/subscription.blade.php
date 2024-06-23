@@ -8,9 +8,9 @@
     <style>
         body, html {
             height: 100%;
-            margin: 300px;
+            margin: 250px;
             justify-content: center;
-            align-items: center;
+            /*align-items: center;*/
             background-color: #f0f0f0; /* Optional background color */
         }
 
@@ -30,7 +30,7 @@
             border-radius: 8px;
             width: 100%; /* Make the card element 100% width */
             max-width: 600px; /* Maximum width for the card element */
-            margin: 40px auto; /* Center the Stripe card element */
+            margin: 40px auto; /* Center the stripe card element */
             box-sizing: border-box; /* Include padding and border in element's total width and height */
             font-size: 18px; /* Adjust font size */
         }
@@ -53,7 +53,7 @@
             background-color: #45a049;
         }
     </style>
-    <!-- Stripe.js Library -->
+    <!-- stripe.js Library -->
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -73,10 +73,13 @@
         @endforeach
     </select>
 
-    <!-- Placeholder for the Stripe Card Element -->
-    <div id="card-element"><!-- Stripe Element will be inserted here --></div>
+    <!-- Placeholder for the stripe Card Element -->
+    <div id="card-element"><!-- stripe Element will be inserted here --></div>
     <!-- Submit Button -->
     <button type="submit" id="submit-button">Subscribe</button>
+
+    <a id="submit-button" href="{{ route('payment-methods.index') }}">Manage Payment Methods</a>
+
 </form>
 
 <script>
@@ -138,6 +141,7 @@
             }
         });
     });
+
 </script>
 </body>
 </html>

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             // $table->string('image')->nullable;
-            $table->string('stripe_product_id'); // Add Stripe product ID
+            $table->string('stripe_product_id'); // Add stripe product ID
             $table->timestamps();
         });
     }
