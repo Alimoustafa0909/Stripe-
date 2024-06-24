@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name'); // nullable
             $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
-            $table->decimal('amount');
+            $table->integer('amount');
             $table->integer('interval_count');
             $table->string('interval');
             $table->string('currency');

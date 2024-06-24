@@ -45,14 +45,16 @@ class StripeEventListener
             // Find the product by its stripe product ID
             $product = Product::where('stripe_product_id', $stripeProductId)->first();
 
-            if ($product) {
-                // Update the product details
-                $product->name = $productData['name'];
-                $product->description = $productData['description'];
-                // $product->image = $productData['images']; // Assuming images are stored differently
-                // Update other fields as needed
-                $product->save();
-            }
+                if(!$product){
+                    return;
+                }
+            $product->name = $productData['name'];
+            $product->description = $productData['description'];
+            // $product->image = $productData['images']; // Assuming images are stored differently
+            // Update other fields as needed
+            $product->save();
+
+
         } elseif ($payload['type'] === 'price.created') {
             $plan = new Plan();
 
@@ -98,8 +100,6 @@ class StripeEventListener
                 $payment->pm_last_four = $productData['card']['last4'];
                 $payment->month = $productData['card']['exp_month'];
             $payment->year = $productData['card']['exp_year'];
-
-
 
 //            $existingDefault = PaymentMethod::where('user_id', $user->id)->where('default', true)->first();
 //

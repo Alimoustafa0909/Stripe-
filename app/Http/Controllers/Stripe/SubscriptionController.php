@@ -17,7 +17,7 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $productId = 'prod_QLolslzCLOKLVc'; // Replace with the actual product ID that you want to show
+        $productId = 'prod_QM1I7IBTgmaKar'; // Replace with the actual product ID that you want to show
         $intent = SetupIntent::create();
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
@@ -48,7 +48,7 @@ class SubscriptionController extends Controller
         // Attach the payment method to the user
         $user->createOrGetStripeCustomer();/*This Function ensures that the authenticated user has a corresponding customer record in stripe.
     if not he make a record for this user */
-        $user->updateDefaultPaymentMethod($paymentMethod);//if the payment method of the user has been changed
+        $user->updateDefaultPaymentMethod($paymentMethod);//if the default payment method of the user has been changed
 
 
         $subscription = $user->newSubscription('default', $plan)
