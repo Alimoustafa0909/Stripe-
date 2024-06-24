@@ -4,6 +4,9 @@ namespace App\Listeners;
 
 use App\Models\PaymentMethod;
 use App\Models\Plan;
+use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Events\WebhookReceived;
 use App\Models\Product;
 
@@ -85,14 +88,43 @@ class StripeEventListener
             }
 
         }elseif ($payload['type'] === 'payment_method.attached') {
+
+            $user = User::where('stripe_id', $productData['customer'])->first();
+
+            if ($user) {
+                // Check if the payment method already exists for the user
+                $existingPaymentMethod = PaymentMethod::where('user_id', $user->id)
+                    ->where('pm_last_four', $productData['card']['last4'])
+                    ->where('pm_type', $productData['card']['brand'])
+                    ->first();
+
+                if ($existingPaymentMethod) {
+
+                    return;
+                }
+
             $payment = new PaymentMethod();
+            $payment->user_id= $user->id;
             $payment->stripe_payment_method_id= $productData['id'];
             $payment->pm_type= $productData['card']['brand'];
             $payment->pm_last_four= $productData['card']['last4'];
-            $payment->expires_at= $productData['card']['exp_year'];
-            $payment->save();
+            $payment->expires_at = Carbon::createFromDate(
+                $productData['card']['exp_year'],
+                $productData['card']['exp_month'],
+                1
+            )->endOfMonth();
+//            $existingDefault = PaymentMethod::where('user_id', $user->id)->where('default', true)->first();
+//
+//            // Set this payment method as default if there's no existing default
+//            if (!$existingDefault) {
+//                $productData->default = true;
+//            }
 
+
+
+            $payment->save();
         }
             // You can add more conditions based on different webhook types
     }
+        }
 }

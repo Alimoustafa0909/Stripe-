@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('stripe_payment_method_id')->unique();
             $table->string('pm_type')->nullable();
             $table->string('pm_last_four', 4)->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->int('year')->nullable();
+            $table->timestamp('month')->nullable();
             $table->boolean('default')->default(false);
             $table->timestamps();
         });
