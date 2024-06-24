@@ -38,6 +38,9 @@
             color: red;
             margin-bottom: 20px;
         }
+
+
+
     </style>
 </head>
 <body>
@@ -62,15 +65,15 @@
     <tr>
         <th>Payment Method</th>
         <th>Default</th>
-        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
     @foreach ($paymentMethods as $paymentMethod)
         <tr>
             <td>{{ $paymentMethod->stripe_payment_method_id }}</td>
-            <td>{{ $paymentMethod->default ? 'Default' : '' }}</td>
             <td>
+                {{ $paymentMethod->default ? 'Default' : '' }}
+
                 @if (!$paymentMethod->default)
                     <form action="{{ route('payment-methods.set-default') }}" method="POST">
                         @csrf
@@ -79,6 +82,7 @@
                     </form>
                 @endif
             </td>
+
         </tr>
     @endforeach
     </tbody>
@@ -126,5 +130,8 @@
         });
     });
 </script>
+<a href="{{route('subscription')}}">Go Back</a>
+
+
 </body>
 </html>

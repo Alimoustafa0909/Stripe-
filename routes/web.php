@@ -28,7 +28,7 @@ Route::post('/payment-methods/set-default', [PaymentMethodController::class, 'se
 Route::get('/payment-methods/create', [PaymentMethodController::class, 'create'])->name('payment-methods.create');
 Route::post('/payment-methods', [PaymentMethodController::class, 'store'])->name('payment-methods.store');
 
-Route::get('/subscription', [SubscriptionController::class, 'showSubscriptionForm']);
+Route::get('/subscription', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription');
 Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
 
 

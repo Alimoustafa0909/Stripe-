@@ -13,6 +13,7 @@ class PaymentMethodController extends Controller
     public function index()
     {
         $user = auth()->user();
+
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
 

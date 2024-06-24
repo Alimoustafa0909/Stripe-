@@ -17,7 +17,7 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $productId = 'prod_QLU2tSkfq0G6qV'; // Replace with the actual product ID that you want to show
+        $productId = 'prod_QLolslzCLOKLVc'; // Replace with the actual product ID that you want to show
         $intent = SetupIntent::create();
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
@@ -27,9 +27,13 @@ class SubscriptionController extends Controller
             abort(404, 'Product not found');
         }
 
+        $user = auth()->user();
+
+        $paymentMethods = $user->paymentMethods;
+        $defaultPaymentMethod = $user->defaultPaymentMethod;
         $clientSecret = $intent->client_secret;
 
-        return view('stripe.subscription', compact('clientSecret', 'product'));
+        return view('stripe.subscription', compact('clientSecret', 'product','paymentMethods','defaultPaymentMethod'));
     }
 
     public function subscribe(Request $request)

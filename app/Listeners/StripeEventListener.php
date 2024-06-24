@@ -87,32 +87,20 @@ class StripeEventListener
                 $plan->delete();
             }
 
-        }elseif ($payload['type'] === 'payment_method.attached') {
+        } elseif ($payload['type'] === 'payment_method.attached') {
 
             $user = User::where('stripe_id', $productData['customer'])->first();
 
-            if ($user) {
-                // Check if the payment method already exists for the user
-                $existingPaymentMethod = PaymentMethod::where('user_id', $user->id)
-                    ->where('pm_last_four', $productData['card']['last4'])
-                    ->where('pm_type', $productData['card']['brand'])
-                    ->first();
+                $payment = new PaymentMethod();
+                $payment->user_id = $user->id;
+                $payment->stripe_payment_method_id = $productData['id'];
+                $payment->pm_type = $productData['card']['brand'];
+                $payment->pm_last_four = $productData['card']['last4'];
+                $payment->month = $productData['card']['exp_month'];
+            $payment->year = $productData['card']['exp_year'];
 
-                if ($existingPaymentMethod) {
 
-                    return;
-                }
 
-            $payment = new PaymentMethod();
-            $payment->user_id= $user->id;
-            $payment->stripe_payment_method_id= $productData['id'];
-            $payment->pm_type= $productData['card']['brand'];
-            $payment->pm_last_four= $productData['card']['last4'];
-            $payment->expires_at = Carbon::createFromDate(
-                $productData['card']['exp_year'],
-                $productData['card']['exp_month'],
-                1
-            )->endOfMonth();
 //            $existingDefault = PaymentMethod::where('user_id', $user->id)->where('default', true)->first();
 //
 //            // Set this payment method as default if there's no existing default
@@ -120,11 +108,19 @@ class StripeEventListener
 //                $productData->default = true;
 //            }
 
+            if ($user) {
+                // Check if the payment method already exists for the user
+                $existingPaymentMethod = PaymentMethod::where('user_id', $user->id)->where('pm_last_four', $productData['card']['last4'])
+                    ->where('pm_type', $productData['card']['brand'])
+                    ->first();
 
+                if ($existingPaymentMethod) {
+                    return;
+                }
 
-            $payment->save();
-        }
+                $payment->save();
+            }
             // You can add more conditions based on different webhook types
-    }
         }
+    }
 }
