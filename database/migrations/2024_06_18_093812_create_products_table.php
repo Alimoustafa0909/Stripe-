@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->nullable();;
             // $table->string('image')->nullable;
             $table->string('stripe_product_id'); // Add stripe product ID
             $table->timestamps();

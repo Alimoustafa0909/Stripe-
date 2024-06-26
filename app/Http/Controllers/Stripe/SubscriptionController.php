@@ -17,7 +17,8 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $productId = 'prod_QM1I7IBTgmaKar'; // Replace with the actual product ID that you want to show
+        $firstProduct = Product::latest()->first();
+        $productId =$firstProduct->stripe_product_id;
         $intent = SetupIntent::create();
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
@@ -52,7 +53,6 @@ class SubscriptionController extends Controller
 
 
         $subscription = $user->newSubscription('default', $plan)
-            ->trialDays(1)
             ->create($paymentMethod);
 
         return response()->json(['success' => true]);

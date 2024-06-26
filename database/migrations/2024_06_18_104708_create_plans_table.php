@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // nullable
+            $table->string('name')->nullable();; // nullable
             $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
             $table->integer('amount');
             $table->integer('interval_count');
