@@ -29,12 +29,14 @@ class SubscriptionController extends Controller
         }
 
         $user = auth()->user();
-
+//        $subscription_user= $user->subscriptions()->first();
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
         $clientSecret = $intent->client_secret;
 
-        return view('stripe.subscription', compact('clientSecret', 'product','paymentMethods','defaultPaymentMethod'));
+        $subscriptions = $user->subscriptions()->get();
+
+        return view('stripe.subscription', compact('clientSecret', 'product','paymentMethods','defaultPaymentMethod','subscriptions'));
     }
 
     public function subscribe(Request $request)

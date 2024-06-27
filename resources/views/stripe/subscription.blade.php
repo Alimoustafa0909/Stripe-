@@ -111,6 +111,13 @@
     </form>
 </div>
 
+
+@if ($subscriptions)
+    <h2>Your Subscription</h2>
+    <p>Current Plan: {{ $subscriptions->plan->name }}</p>
+@else
+    <p>You have no active subscriptions.</p>
+@endif
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         @if (!$defaultPaymentMethod)
