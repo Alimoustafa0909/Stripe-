@@ -38,8 +38,6 @@
             color: red;
             margin-bottom: 20px;
         }
-
-
     </style>
 </head>
 <body>
@@ -81,7 +79,6 @@
                     </form>
                 @endif
             </td>
-
         </tr>
     @endforeach
     </tbody>
@@ -104,12 +101,16 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const {paymentMethod, error} = await stripe.createPaymentMethod(
-                'card',
-                cardElement);
+            const {setupIntent, error} = await stripe.confirmCardSetup(
+                '{{ $clientSecret }}', {
+                    payment_method: {
+                        card: cardElement,
+                    }
+                }
+            );
 
             if (error) {
-                console.error('Error creating payment method:', error);
+                console.error('Error setting up card:', error);
             } else {
                 const response = await fetch('{{ route('payment-methods.store') }}', {
                     method: 'POST',
@@ -118,14 +119,14 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     },
                     body: JSON.stringify({
-                        payment_method: paymentMethod.id
+                        payment_method: setupIntent.payment_method
                     }),
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = '{{ route('payment-methods.index')}}';
+                    window.location.href = '{{ route('payment-methods.index') }}';
                 } else {
                     console.error('Error adding payment method:', result.error);
                 }
@@ -133,8 +134,6 @@
         });
     });
 </script>
-<a href="{{route('subscription')}}">Go Back</a>
-
-
+<a href="{{ route('subscription') }}">Go Back</a>
 </body>
 </html>

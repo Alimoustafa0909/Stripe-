@@ -63,18 +63,18 @@ class SubscriptionController extends Controller
         $plan = $request->input('plan');
         Stripe::setApiKey(config('services.stripe.secret'));
 
+        $user->createOrGetStripeCustomer();
+        $user->updateDefaultPaymentMethod($paymentMethod);//if the default payment method of the user has been changed
+
+
         if ($user->subscribed($productId)) {
 
             if ($user->subscribedToPrice($plan, $productId)) {
                 return response()->json(['error' => 'You are already subscribed to this plan You can Select Another Plan'], 400);
             }
-
             $user->subscription($productId)->swap($plan);
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
         }
-
-        $user->createOrGetStripeCustomer();
-        $user->updateDefaultPaymentMethod($paymentMethod);//if the default payment method of the user has been changed
 
         $user->newSubscription($productId, $plan)
             ->create($paymentMethod);

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Stripe;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
+use Stripe\SetupIntent;
 use Stripe\Stripe;
 
 class PaymentMethodController extends Controller
@@ -14,10 +15,15 @@ class PaymentMethodController extends Controller
     {
         $user = auth()->user();
 
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        $intent = SetupIntent::create();
+        $clientSecret = $intent->client_secret;
+
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
 
-        return view('payment-methods.index', compact('paymentMethods', 'defaultPaymentMethod'));
+        return view('payment-methods.index', compact('paymentMethods', 'defaultPaymentMethod','clientSecret'));
     }
 
     public function setDefault(Request $request)
