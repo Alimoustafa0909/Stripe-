@@ -130,18 +130,23 @@
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
+
+{{--@if(Auth::user()->subscription($productId)->trial_ends_at)--}}
+{{--    <h2> You are Now on Trial Mode On Standard Subscription </h2>--}}
+{{--@endif--}}
+
 @if($price)
     <div class="subscription-header">
         <h3>Current Subscription Plan:</h3>
-
         <table id="subscription-details">
+
             <tr>
                 <th>Plan Name</th>
                 <th>Amount</th>
                 <th>Currency</th>
                 <th>Interval</th>
                 <th>Ends At</th>
-
+                <th>Trialing Mode</th>
             </tr>
             <tr>
                 <td>{{ $price->name }}</td>
@@ -149,22 +154,28 @@
                 <td>{{ strtoupper($price->currency) }}</td>
                 <td>{{ $price->interval_count }} {{ $price->interval }}</td>
                 <td>{{Auth::user()->subscription($productId)->ends_at}}</td>
+                <td>{{Auth::user()->subscription($productId)->trial_ends_at}}</td>
 
             </tr>
         </table>
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
             @csrf
             <input type="hidden" name="_method">
-            <button type="submit" class="cancel-button">Cancel Subscription</button>
+            @if(Auth::user()->subscription($productId)->trial_ends_at)
+                <h2>You are on Trial Mode Now Enjoy it </h2>
+            @else
+                @if(!Auth::user()->subscription($productId)->ends_at)
+                    <button type="submit" class="cancel-button">Cancel Subscription</button>
+                @endif
+            @endif
+
         </form>
     </div>
 @endif
 
 <div class="card">
-
     <div class="error-message" id="error-message"></div>
     <div class="success-message" id="success-message"></div>
-
 
     <h2>Product: {{ $product->name }}</h2>
     <p>Description: {{ $product->description }}</p>
@@ -290,11 +301,11 @@
                 } else {
 
                     const successMessageDiv = document.getElementById('success-message');
-                      successMessageDiv.textContent = `You have successfully subscribed to the ${planName} plan!`;
+                    successMessageDiv.textContent = `You have successfully subscribed to the ${planName} plan!`;
                     successMessageDiv.style.display = 'block';
                     setTimeout(() => {
                         window.location.reload();
-                    }, 3000);
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('Unexpected error:', error);

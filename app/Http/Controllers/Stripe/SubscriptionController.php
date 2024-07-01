@@ -19,6 +19,7 @@ class SubscriptionController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
+
         $productId = Product::latest()->first()->stripe_product_id;
 
         if (!$productId) {
@@ -27,14 +28,13 @@ class SubscriptionController extends Controller
         }
 
         $intent = SetupIntent::create();
+        $clientSecret = $intent->client_secret;
         //Get the specific product with its plans
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
-
-//        $subscription_user= $user->subscriptions()->first();
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
 
-        $clientSecret = $intent->client_secret;
+
 
         $userSub = $user->subscription($productId);
         $price = null;
@@ -43,12 +43,6 @@ class SubscriptionController extends Controller
             $userPlanId = $userSub->stripe_price;
             $price = Plan::where('stripe_plan_id', $userPlanId)->first();
         }
-
-//
-//        $userSub = $user->subscription($productId);
-//
-//        $userPlanId = $userSub->stripe_price;
-//        $price = Plan::where('stripe_plan_id' ,$userPlanId)->first();
 
         return view('stripe.subscription', compact(
             'clientSecret',
@@ -78,8 +72,8 @@ class SubscriptionController extends Controller
             $user->subscription($productId)->swap($plan);
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
         }
-        $user->createOrGetStripeCustomer();
 
+        $user->createOrGetStripeCustomer();
         $user->updateDefaultPaymentMethod($paymentMethod);//if the default payment method of the user has been changed
 
         $user->newSubscription($productId, $plan)
