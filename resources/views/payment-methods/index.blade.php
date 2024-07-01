@@ -40,7 +40,6 @@
         }
 
 
-
     </style>
 </head>
 <body>
@@ -105,7 +104,9 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const {paymentMethod, error} = await stripe.createPaymentMethod('card', cardElement);
+            const {paymentMethod, error} = await stripe.createPaymentMethod(
+                'card',
+                cardElement);
 
             if (error) {
                 console.error('Error creating payment method:', error);
@@ -116,13 +117,15 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     },
-                    body: JSON.stringify({payment_method: paymentMethod.id}),
+                    body: JSON.stringify({
+                        payment_method: paymentMethod.id
+                    }),
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = '{{ route('payment-methods.index') }}';
+                    window.location.href = '{{ route('payment-methods.index')}}';
                 } else {
                     console.error('Error adding payment method:', result.error);
                 }

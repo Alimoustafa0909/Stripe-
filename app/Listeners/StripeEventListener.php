@@ -93,6 +93,10 @@ class StripeEventListener
 
             $user = User::where('stripe_id', $productData['customer'])->first();
 
+            if(!$user)
+            {
+                return;
+            }
                 $payment = new PaymentMethod();
                 $payment->user_id = $user->id;
                 $payment->stripe_payment_method_id = $productData['id'];
@@ -101,25 +105,24 @@ class StripeEventListener
                 $payment->month = $productData['card']['exp_month'];
             $payment->year = $productData['card']['exp_year'];
 
-//            $existingDefault = PaymentMethod::where('user_id', $user->id)->where('default', true)->first();
-//
-//            // Set this payment method as default if there's no existing default
-//            if (!$existingDefault) {
-//                $productData->default = true;
-//            }
-
-            if ($user) {
-                // Check if the payment method already exists for the user
+            // Check if the payment method already exists for the user
                 $existingPaymentMethod = PaymentMethod::where('user_id', $user->id)->where('pm_last_four', $productData['card']['last4'])
                     ->where('pm_type', $productData['card']['brand'])
                     ->first();
-
                 if ($existingPaymentMethod) {
                     return;
                 }
 
-                $payment->save();
+            $existingDefault = PaymentMethod::where('user_id', $user->id)->where('default', true)->first();
+
+            // Set this payment method as default if there's no existing default
+            if (!$existingDefault) {
+                $payment->default = true;
             }
+
+
+            $payment->save();
+
             // You can add more conditions based on different webhook types
         }
     }
