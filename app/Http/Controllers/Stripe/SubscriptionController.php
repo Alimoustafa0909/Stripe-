@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Stripe;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Product;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Stripe\SetupIntent;
 use Stripe\Stripe;
 use function Laravel\Prompts\error;
@@ -18,12 +20,9 @@ class SubscriptionController extends Controller
         $user = auth()->user();
 
         Stripe::setApiKey(config('services.stripe.secret'));
-
-
         $productId = Product::latest()->first()->stripe_product_id;
 
         if (!$productId) {
-            // Handle the case where the product is not found
             abort(404, 'Product not found');
         }
 
@@ -34,8 +33,6 @@ class SubscriptionController extends Controller
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
 
-
-
         $userSub = $user->subscription($productId);
         $price = null;
 
@@ -44,13 +41,21 @@ class SubscriptionController extends Controller
             $price = Plan::where('stripe_plan_id', $userPlanId)->first();
         }
 
+
+        $subscription = $user->subscription($productId);
+        $endTime = true;
+        if ($subscription && $subscription->ends_at && $subscription->ends_at->lt(Carbon::now())) {
+            $endTime = false;
+        }
+
         return view('stripe.subscription', compact(
             'clientSecret',
             'product',
             'paymentMethods',
             'defaultPaymentMethod',
             'price',
-            'productId'
+            'productId',
+            'endTime'
         ));
     }
 

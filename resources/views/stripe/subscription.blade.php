@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscription</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         .card {
             width: 800px;
@@ -75,8 +76,8 @@
         #error-message {
             color: red;
             margin-top: 20px;
+            font-weight: bold;
         }
-
 
         .subscription-header {
             width: 100%;
@@ -131,11 +132,17 @@
 </head>
 <body>
 
-{{--@if(Auth::user()->subscription($productId)->trial_ends_at)--}}
-{{--    <h2> You are Now on Trial Mode On Standard Subscription </h2>--}}
-{{--@endif--}}
+@if ($errors->any())
+    <div id="error-message">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-@if($price)
+@if($price && $endTime)
     <div class="subscription-header">
         <h3>Current Subscription Plan:</h3>
         <table id="subscription-details">
@@ -154,8 +161,7 @@
                 <td>{{ strtoupper($price->currency) }}</td>
                 <td>{{ $price->interval_count }} {{ $price->interval }}</td>
                 <td>{{Auth::user()->subscription($productId)->ends_at}}</td>
-                <td>{{Auth::user()->subscription($productId)->trial_ends_at}}</td>
-
+                <td>Ends At {{Auth::user()->subscription($productId)->trial_ends_at}}</td>
             </tr>
         </table>
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
@@ -223,7 +229,7 @@
     </form>
 
 
-    @if($price && $price->name =='Standard')
+    @if($price && $price->name =='Standard' && $endTime)
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
     @elseif($price && $price->name== 'Premium')
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>

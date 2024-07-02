@@ -27,9 +27,7 @@ class StripeEventListener
             $product = new Product();
             $product->name = $productData['name'];
             $product->description = $productData['description'];
-            // $product->image = $productData['images'];
             $product->stripe_product_id = $productData['id']; // stripe product ID
-            // Other fields as needed
             $product->save();
         } elseif ($payload['type'] === 'product.deleted') {
             $stripeProductId = $productData['id'];
@@ -50,8 +48,7 @@ class StripeEventListener
                 }
             $product->name = $productData['name'];
             $product->description = $productData['description'];
-            // $product->image = $productData['images']; // Assuming images are stored differently
-            // Update other fields as needed
+
             $product->save();
 
 
@@ -72,14 +69,17 @@ class StripeEventListener
             $stripePlanId = $productData['id'];
             $plan = Plan::where('stripe_plan_id', $stripePlanId)->first();
 
-            if ($plan) {
-                $plan->name = $productData['nickname'];
-                $plan->currency = $productData['currency'];
-                $plan->amount = $productData['unit_amount'];
-                $plan->interval_count = $productData['recurring']['interval_count'];
-                $plan->interval = $productData['recurring']['interval'];
-                $plan->save();
+
+            if(!$plan){
+                return;
             }
+            $plan->name = $productData['nickname'];
+            $plan->currency = $productData['currency'];
+            $plan->amount = $productData['unit_amount'];
+            $plan->interval_count = $productData['recurring']['interval_count'];
+            $plan->interval = $productData['recurring']['interval'];
+            $plan->save();
+
         } elseif ($payload['type'] === 'price.deleted') {
             $stripePlanId = $productData['id'];
             // Find the product by its stripe product ID and delete it
