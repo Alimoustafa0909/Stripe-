@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @php
+        use Carbon\Carbon;
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscription</title>
@@ -148,20 +151,24 @@
         <table id="subscription-details">
 
             <tr>
-                <th>Plan Name</th>
+                <th>Name</th>
                 <th>Amount</th>
                 <th>Currency</th>
                 <th>Interval</th>
                 <th>Ends At</th>
-                <th>Trialing Mode</th>
+                <th>Trialing Until</th>
             </tr>
             <tr>
                 <td>{{ $price->name }}</td>
                 <td>{{ $price->amount / 100 }}$</td>
                 <td>{{ strtoupper($price->currency) }}</td>
                 <td>{{ $price->interval_count }} {{ $price->interval }}</td>
-                <td>{{Auth::user()->subscription($productId)->ends_at}}</td>
-                <td>Ends At {{Auth::user()->subscription($productId)->trial_ends_at}}</td>
+                <td>
+                    {{ Auth::user()->subscription($productId)->ends_at ? (Auth::user()->subscription($productId)->ends_at) : 'N/A' }}
+                </td>
+                <td>
+                    {{ Auth::user()->subscription($productId)->trial_ends_at ? (Auth::user()->subscription($productId)->trial_ends_at) : 'N/A' }}
+                </td>
             </tr>
         </table>
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
@@ -169,10 +176,8 @@
             <input type="hidden" name="_method">
             @if(Auth::user()->subscription($productId)->trial_ends_at)
                 <h2>You are on Trial Mode Now Enjoy it </h2>
-            @else
-                @if(!Auth::user()->subscription($productId)->ends_at)
-                    <button type="submit" class="cancel-button">Cancel Subscription</button>
-                @endif
+            @elseif(!Auth::user()->subscription($productId)->ends_at)
+                <button type="submit" class="cancel-button">Cancel Subscription</button>
             @endif
 
         </form>
@@ -182,10 +187,8 @@
 <div class="card">
     <div class="error-message" id="error-message"></div>
     <div class="success-message" id="success-message"></div>
-
     <h2>Product: {{ $product->name }}</h2>
     <p>Description: {{ $product->description }}</p>
-
     <form id="subscription-form">
         <label for="plan">Select Plan:</label>
         <select id="plan" name="plan">
@@ -200,12 +203,10 @@
         @if ($defaultPaymentMethod)
             <label for="payment-method">Select Payment Method:</label>
             <select id="payment-method" name="payment_method">
-                @if ($defaultPaymentMethod)
-                    <option value="{{ $defaultPaymentMethod->stripe_payment_method_id }}">
-                        {{ $defaultPaymentMethod->pm_type }} ending in {{ $defaultPaymentMethod->pm_last_four }}
-                        (Default)
-                    </option>
-                @endif
+                <option value="{{ $defaultPaymentMethod->stripe_payment_method_id }}">
+                    {{ $defaultPaymentMethod->pm_type }} ending in {{ $defaultPaymentMethod->pm_last_four }}
+                    (Default)
+                </option>
                 @foreach ($paymentMethods as $paymentMethod)
                     @if (!$paymentMethod->default)
                         <option value="{{ $paymentMethod->stripe_payment_method_id }}">
@@ -224,23 +225,22 @@
             Subscribe
             <i class="fa fa-spinner fa-spin loading-spinner" id="loading-spinner"></i>
         </button>
-
         <a id="submit-button" href="{{ route('payment-methods.index') }}">Manage Payment Methods</a>
     </form>
 
 
     @if($price && $price->name =='Standard' && $endTime)
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-    @elseif($price && $price->name== 'Premium')
+    @elseif($price && $price->name== 'Premium'&& $endTime)
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
         <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-    @elseif($price && $price->name=='Elite')
+    @elseif($price && $price->name=='Elite'&& $endTime)
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
         <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
         <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
     @endif
 </div>
-
+<a id="submit-button" href="{{ route('dashboard') }}">Dashboard</a>
 
 <script>
     document.addEventListener('DOMContentLoaded', async () => {

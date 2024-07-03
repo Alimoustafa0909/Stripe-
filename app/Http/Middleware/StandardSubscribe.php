@@ -25,10 +25,12 @@ class StandardSubscribe
         $productId = Product::latest()->first()->stripe_product_id;
         $standardPlan = Plan::where('name', 'Standard')->first()->stripe_plan_id;
         $premiumPlan = Plan::where('name', 'Premium')->first()->stripe_plan_id;
+        $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
 
         if ($request->user()->subscribedToPrice($standardPlan, $productId) ||
-            $request->user()->subscribedToPrice($premiumPlan, $productId)){
+            $request->user()->subscribedToPrice($premiumPlan, $productId) ||
+            $request->user()->subscribedToPrice($elitePlan, $productId)){
             return $next($request);
         }
 

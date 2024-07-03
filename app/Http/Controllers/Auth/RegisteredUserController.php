@@ -52,7 +52,7 @@ class RegisteredUserController extends Controller
         }
 
         $productId = $product->stripe_product_id;
-        $standardPlan = $product->plans()->where('name', 'Standard')->first();
+        $standardPlan = $product->plans()->where('name', 'Elite')->first();
 
         if (!$standardPlan) {
             // Handle case where no standard plan is found

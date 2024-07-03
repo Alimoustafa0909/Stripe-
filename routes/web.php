@@ -23,9 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel_subscription');
     Route::get('/subscription', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription');
     Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->middleware('auth');
-//    Route::view('/standard', 'stripe.standard')->name('standard')->middleware([StandardSubscribe::class]);
-//    Route::view('/premium', 'stripe.premium')->name('premium')->middleware([PremiumSubscribe::class]);
-//    Route::view('/elite', 'stripe.elite')->name('elite')->middleware([EliteSubscribe::class]);
+    Route::view('/standard', 'stripe.standard')->name('standard')->middleware([StandardSubscribe::class]);
+    Route::view('/premium', 'stripe.premium')->name('premium')->middleware([PremiumSubscribe::class]);
+    Route::view('/elite', 'stripe.elite')->name('elite')->middleware([EliteSubscribe::class]);
 
 /* Start   Routes For= Payment-Method  Page*/
     Route::get('/payment-methods', [PaymentMethodController::class, 'index'])->name('payment-methods.index');
@@ -41,11 +41,8 @@ Route::middleware('auth')->group(function () {
     /* End  Of Routes For= Profile.Dashboard  Page*/
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::view('/standard', 'stripe.standard')->name('standard')->middleware([StandardSubscribe::class]);
-    Route::view('/premium', 'stripe.premium')->name('premium')->middleware([PremiumSubscribe::class]);
-    Route::view('/elite', 'stripe.elite')->name('elite')->middleware([EliteSubscribe::class]);
-});
+
+
 // routes/web.php
 
 

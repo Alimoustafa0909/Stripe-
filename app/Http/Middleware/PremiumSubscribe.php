@@ -23,10 +23,11 @@ class PremiumSubscribe
         }
 
         $productId = Product::latest()->first()->stripe_product_id;
-        $plan = Plan::where('name', 'Premium')->first();
-        $premiumPlan = $plan->stripe_plan_id;
+        $premiumPlan = Plan::where('name', 'Premium')->first()->stripe_plan_id;
+        $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
-        if ($request->user()->subscribedToPrice($premiumPlan, $productId) || $request->user()->subscribedToPrice('price_1PYEtsH1nccn6k3zBaMfp0GH', $productId)) {
+
+        if ($request->user()->subscribedToPrice($premiumPlan, $productId) || $request->user()->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);
         }
 
