@@ -151,32 +151,33 @@
         <table id="subscription-details">
 
             <tr>
+                @if(!$user->subscription($productId)->onTrial())
                 <th>Name</th>
                 <th>Amount</th>
                 <th>Currency</th>
                 <th>Interval</th>
                 <th>Ends At</th>
+                @endif
                 <th>Trialing Until</th>
             </tr>
             <tr>
+                @if(!$user->subscription($productId)->onTrial())
                 <td>{{ $price->name }}</td>
                 <td>{{ $price->amount / 100 }}$</td>
                 <td>{{ strtoupper($price->currency) }}</td>
                 <td>{{ $price->interval_count }} {{ $price->interval }}</td>
-                <td>
-                    {{ Auth::user()->subscription($productId)->ends_at ? (Auth::user()->subscription($productId)->ends_at) : 'N/A' }}
-                </td>
-                <td>
-                    {{ Auth::user()->subscription($productId)->trial_ends_at ? (Auth::user()->subscription($productId)->trial_ends_at) : 'N/A' }}
-                </td>
+                <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>
+                @endif
+                <td>{{ $user->subscription($productId)->trial_ends_at ? ($user->subscription($productId)->trial_ends_at) : 'N/A' }}</td>
+
             </tr>
         </table>
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
             @csrf
             <input type="hidden" name="_method">
-            @if(Auth::user()->subscription($productId)->trial_ends_at)
+            @if($user->subscription($productId)->trial_ends_at)
                 <h2>You are on Trial Mode Now Enjoy it </h2>
-            @elseif(!Auth::user()->subscription($productId)->ends_at)
+            @elseif(!$user->subscription($productId)->ends_at)
                 <button type="submit" class="cancel-button">Cancel Subscription</button>
             @endif
 
@@ -220,7 +221,6 @@
             <div id="card-element"></div>
         @endif
 
-        <!-- Submit Button -->
         <button type="submit" id="submit-button">
             Subscribe
             <i class="fa fa-spinner fa-spin loading-spinner" id="loading-spinner"></i>

@@ -14,7 +14,7 @@ class PremiumSubscribe
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\Http\Foundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,8 +26,12 @@ class PremiumSubscribe
         $premiumPlan = Plan::where('name', 'Premium')->first()->stripe_plan_id;
         $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
+        $user = $request->user();
+        $subscription = $user->subscription($productId);
 
-        if ($request->user()->subscribedToPrice($premiumPlan, $productId) || $request->user()->subscribedToPrice($elitePlan, $productId)) {
+        if ($subscription && $subscription->onTrial() ||
+            $user->subscribedToPrice($premiumPlan, $productId) ||
+            $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);
         }
 

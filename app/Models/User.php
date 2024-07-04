@@ -15,6 +15,8 @@ class User extends Authenticatable
     use Billable;
 
 
+
+
     /**
      * The attributes that are mass assignable.
      *

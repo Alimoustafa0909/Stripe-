@@ -52,14 +52,14 @@ class RegisteredUserController extends Controller
         }
 
         $productId = $product->stripe_product_id;
-        $standardPlan = $product->plans()->where('name', 'Elite')->first();
+        $ElitePlan = $product->plans()->where('name', 'Elite')->first();
 
-        if (!$standardPlan) {
+        if (!$ElitePlan) {
             // Handle case where no standard plan is found
             return redirect()->back()->with('error', 'Standard plan not found.');
         }
 
-        $user->newSubscription($productId, $standardPlan->stripe_plan_id)
+        $user->newSubscription($productId, $ElitePlan->stripe_plan_id)
             ->trialDays(1)
             ->create();
 
@@ -70,3 +70,11 @@ class RegisteredUserController extends Controller
         return redirect(route('dashboard'));
     }
 }
+
+
+//use App\Models\User;
+//
+//$user = User::create([
+//    // ...
+//    'trial_ends_at' => now()->addDays(10),
+//]);

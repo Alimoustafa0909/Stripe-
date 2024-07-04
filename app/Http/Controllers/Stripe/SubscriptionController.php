@@ -32,30 +32,30 @@ class SubscriptionController extends Controller
         $product = Product::with('plans')->where('stripe_product_id', $productId)->first();
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
-
         $userSub = $user->subscription($productId);
-        $price = null;
+        $onTrial = $userSub->onTrial();
 
+        $price = null;
         if ($userSub) {
             $userPlanId = $userSub->stripe_price;
             $price = Plan::where('stripe_plan_id', $userPlanId)->first();
         }
 
-
-        $subscription = $user->subscription($productId);
         $endTime = true;
-        if ($subscription && $subscription->ends_at && $subscription->ends_at->lt(Carbon::now())) {
+        if ($userSub->ends_at && $userSub->ends_at->lt(Carbon::now())) {
             $endTime = false;
         }
 
         return view('stripe.subscription', compact(
             'clientSecret',
+            'user',
             'product',
             'paymentMethods',
             'defaultPaymentMethod',
             'price',
             'productId',
-            'endTime'
+            'endTime',
+            'onTrial'
         ));
     }
 
