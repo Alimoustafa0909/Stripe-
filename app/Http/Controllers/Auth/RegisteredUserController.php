@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Stripe\Stripe;
+use Stripe\Customer;
+use Stripe\SetupIntent;
 
 class RegisteredUserController extends Controller
 {
@@ -21,7 +22,8 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $clientSecret = $this->createSetupIntent()->client_secret;
+        return view('auth.register', compact('clientSecret'));
     }
 
     /**
@@ -31,37 +33,27 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $paymentMethod = $request->payment_method;
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'payment_method' => ['required', 'string'],
         ]);
 
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+
+        // Create User and set trial_ends_at
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'trial_ends_at' => now()->addDays(7), // Set trial period here
         ]);
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-
-        $product = Product::latest()->first();
-        if (!$product) {
-            // Handle case where no product is found
-            return redirect()->back()->with('error', 'No product found.');
-        }
-
-        $productId = $product->stripe_product_id;
-        $ElitePlan = $product->plans()->where('name', 'Elite')->first();
-
-        if (!$ElitePlan) {
-            // Handle case where no standard plan is found
-            return redirect()->back()->with('error', 'Standard plan not found.');
-        }
-
-        $user->newSubscription($productId, $ElitePlan->stripe_plan_id)
-            ->trialDays(1)
-            ->create();
+        $user->createOrGetStripeCustomer();
+        $user->updateDefaultPaymentMethod($paymentMethod);
 
         event(new Registered($user));
 
@@ -69,12 +61,10 @@ class RegisteredUserController extends Controller
 
         return redirect(route('dashboard'));
     }
+
+    protected function createSetupIntent()
+    {
+        Stripe::setApiKey(config('services.stripe.secret'));
+        return SetupIntent::create();
+    }
 }
-
-
-//use App\Models\User;
-//
-//$user = User::create([
-//    // ...
-//    'trial_ends_at' => now()->addDays(10),
-//]);

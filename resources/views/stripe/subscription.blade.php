@@ -145,37 +145,37 @@
     </div>
 @endif
 
-@if($price && $endTime)
+@if($price && $endTime || $user->onTrial())
     <div class="subscription-header">
         <h3>Current Subscription Plan:</h3>
         <table id="subscription-details">
 
             <tr>
-                @if(!$user->subscription($productId)->onTrial())
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Currency</th>
-                <th>Interval</th>
-                <th>Ends At</th>
+                @if(!$user->onTrial())
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Interval</th>
+                    <th>Ends At</th>
                 @endif
                 <th>Trialing Until</th>
             </tr>
             <tr>
-                @if(!$user->subscription($productId)->onTrial())
-                <td>{{ $price->name }}</td>
-                <td>{{ $price->amount / 100 }}$</td>
-                <td>{{ strtoupper($price->currency) }}</td>
-                <td>{{ $price->interval_count }} {{ $price->interval }}</td>
-                <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>
+                @if(!$user->onTrial())
+                    <td>{{ $price->name }}</td>
+                    <td>{{ $price->amount / 100 }}$</td>
+                    <td>{{ strtoupper($price->currency) }}</td>
+                    <td>{{ $price->interval_count }} {{ $price->interval }}</td>
+                    <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>
                 @endif
-                <td>{{ $user->subscription($productId)->trial_ends_at ? ($user->subscription($productId)->trial_ends_at) : 'N/A' }}</td>
+                <td>{{ $user->trial_ends_at ? ($user->trial_ends_at) : 'N/A' }}</td>
 
             </tr>
         </table>
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
             @csrf
             <input type="hidden" name="_method">
-            @if($user->subscription($productId)->trial_ends_at)
+            @if($user->trial_ends_at)
                 <h2>You are on Trial Mode Now Enjoy it </h2>
             @elseif(!$user->subscription($productId)->ends_at)
                 <button type="submit" class="cancel-button">Cancel Subscription</button>
@@ -228,13 +228,12 @@
         <a id="submit-button" href="{{ route('payment-methods.index') }}">Manage Payment Methods</a>
     </form>
 
-
-    @if($price && $price->name =='Standard' && $endTime)
+    @if($price && $price->name =='Standard' && $endTime )
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-    @elseif($price && $price->name== 'Premium'&& $endTime)
+    @elseif($price && $price->name== 'Premium' && $endTime )
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
         <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-    @elseif($price && $price->name=='Elite'&& $endTime)
+    @elseif($price && $price->name=='Elite' && $endTime || $user->onTrial())
         <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
         <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
         <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
@@ -275,8 +274,11 @@
 
                 if (error) {
                     console.error('Error confirming card setup:', error.message);
+                    document.getElementById('error-message').innerText = error.message;
+                    document.getElementById('error-message').style.display = 'block';
                     return;
                 }
+
 
                 paymentMethod = setupIntent.payment_method;
                 @else
@@ -304,10 +306,10 @@
 
                 if (result.error) {
                     document.getElementById('error-message').innerText = result.error;
+                    document.getElementById('error-message').style.display = 'block';
                 } else {
-
                     const successMessageDiv = document.getElementById('success-message');
-                    successMessageDiv.textContent = `You have successfully subscribed to the ${planName} plan!`;
+                    successMessageDiv.textContent = result.message;
                     successMessageDiv.style.display = 'block';
                     setTimeout(() => {
                         window.location.reload();

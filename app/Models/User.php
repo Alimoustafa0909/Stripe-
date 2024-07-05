@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'trial_ends_at',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'trial_ends_at' => 'datetime:Y-m-d',
         ];
     }
 
@@ -61,5 +63,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(PaymentMethod::class)->where('default', true);
     }
+
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+
 
 }

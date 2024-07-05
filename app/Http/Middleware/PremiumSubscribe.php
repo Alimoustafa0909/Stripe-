@@ -27,9 +27,9 @@ class PremiumSubscribe
         $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
         $user = $request->user();
-        $subscription = $user->subscription($productId);
 
-        if ($subscription && $subscription->onTrial() ||
+
+        if ( $user->onTrial() ||
             $user->subscribedToPrice($premiumPlan, $productId) ||
             $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);

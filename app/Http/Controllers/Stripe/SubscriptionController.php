@@ -33,7 +33,7 @@ class SubscriptionController extends Controller
         $paymentMethods = $user->paymentMethods;
         $defaultPaymentMethod = $user->defaultPaymentMethod;
         $userSub = $user->subscription($productId);
-        $onTrial = $userSub->onTrial();
+        $onTrial = $user->onTrial();
 
         $price = null;
         if ($userSub) {
@@ -42,9 +42,12 @@ class SubscriptionController extends Controller
         }
 
         $endTime = true;
-        if ($userSub->ends_at && $userSub->ends_at->lt(Carbon::now())) {
-            $endTime = false;
+        if($userSub){
+            if ($userSub->ends_at && $userSub->ends_at->lt(Carbon::now())) {
+                $endTime = false;
+            }
         }
+
 
         return view('stripe.subscription', compact(
             'clientSecret',
@@ -69,13 +72,20 @@ class SubscriptionController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $user->createOrGetStripeCustomer();
-        $user->updateDefaultPaymentMethod($paymentMethod);//if the default payment method of the user has been changed
+        $user->updateDefaultPaymentMethod($paymentMethod); // Update default payment method if changed
 
+        // Check if the user has a subscription that was canceled but is still in the grace period
+        $subscription = $user->subscription($productId);
+
+        if ($subscription && $subscription->onGracePeriod()) {
+            // Resume the subscription
+            $subscription->resume();
+            return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
+        }
 
         if ($user->subscribed($productId)) {
-
             if ($user->subscribedToPrice($plan, $productId)) {
-                return response()->json(['error' => 'You are already subscribed to this plan You can Select Another Plan'], 400);
+                return response()->json(['error' => 'You are already subscribed to this plan. You can select another plan.'], 400);
             }
             $user->subscription($productId)->swap($plan);
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
@@ -84,7 +94,7 @@ class SubscriptionController extends Controller
         $user->newSubscription($productId, $plan)
             ->create($paymentMethod);
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'message' => 'Subscription created successfully!']);
     }
 
     public function cancelSubscription(Request $request)
