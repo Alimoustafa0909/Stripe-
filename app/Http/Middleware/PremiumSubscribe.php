@@ -30,6 +30,7 @@ class PremiumSubscribe
 
 
         if ( $user->onTrial() ||
+            $user->subscription($productId)->onTrial() ||
             $user->subscribedToPrice($premiumPlan, $productId) ||
             $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);

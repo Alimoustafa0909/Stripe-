@@ -42,7 +42,7 @@ class SubscriptionController extends Controller
         }
 
         $endTime = true;
-        if($userSub){
+        if ($userSub) {
             if ($userSub->ends_at && $userSub->ends_at->lt(Carbon::now())) {
                 $endTime = false;
             }
@@ -77,7 +77,7 @@ class SubscriptionController extends Controller
         // Check if the user has a subscription that was canceled but is still in the grace period
         $subscription = $user->subscription($productId);
 
-        if ($subscription && $subscription->onGracePeriod()) {
+        if ($subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
             // Resume the subscription
             $subscription->resume();
             return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
@@ -91,6 +91,19 @@ class SubscriptionController extends Controller
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
         }
 
+        // Check if the user is on a trial period
+        if ($user->onTrial()) {
+            $trialEndsAt = $user->trial_ends_at;
+
+            $user->newSubscription($productId, $plan)
+                ->trialUntil($trialEndsAt)
+                ->create($paymentMethod);
+
+            return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
+        }
+
+
+        // Create a new subscription without a trial period
         $user->newSubscription($productId, $plan)
             ->create($paymentMethod);
 
@@ -106,6 +119,4 @@ class SubscriptionController extends Controller
         return back()->with('success', 'Subscription canceled successfully.');
 
     }
-
-
 }

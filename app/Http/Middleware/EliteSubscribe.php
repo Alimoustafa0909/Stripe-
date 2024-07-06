@@ -28,7 +28,9 @@ class EliteSubscribe
         $user = $request->user();
 
 
-        if ( $user->onTrial() || $user->subscribedToPrice($elitePlan, $productId)) {
+        if ( $user->onTrial() ||
+            $user->subscription($productId)->onTrial() ||
+            $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);
         }
 

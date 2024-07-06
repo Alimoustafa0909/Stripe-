@@ -145,7 +145,7 @@
     </div>
 @endif
 
-@if($price && $endTime || $user->onTrial())
+@if($price && $endTime || $user->onTrial() || $user->subscription()->onTrial())
     <div class="subscription-header">
         <h3>Current Subscription Plan:</h3>
         <table id="subscription-details">
@@ -168,7 +168,13 @@
                     <td>{{ $price->interval_count }} {{ $price->interval }}</td>
                     <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>
                 @endif
-                <td>{{ $user->trial_ends_at ? ($user->trial_ends_at) : 'N/A' }}</td>
+                <td>
+                    @if($user->trial_ends_at || ($user->subscription($productId) && $user->subscription($productId)->onTrial()))
+                        {{ $user->trial_ends_at ?? $user->subscription($productId)->trial_ends_at }}
+                    @else
+                        N/A
+                    @endif
+                </td>
 
             </tr>
         </table>
@@ -228,16 +234,21 @@
         <a id="submit-button" href="{{ route('payment-methods.index') }}">Manage Payment Methods</a>
     </form>
 
-    @if($price && $price->name =='Standard' && $endTime )
-        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-    @elseif($price && $price->name== 'Premium' && $endTime )
-        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-    @elseif($price && $price->name=='Elite' && $endTime || $user->onTrial())
-        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-        <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
-    @endif
+{{--    @if(($price && $price->name =='Standard' && $endTime) || $userSub->onTrial())--}}
+{{--        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>--}}
+{{--    @endif--}}
+
+{{--    @if(($price && $price->name == 'Premium' && $endTime) || $userSub->onTrial())--}}
+{{--        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>--}}
+{{--        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>--}}
+{{--    @endif--}}
+
+{{--    @if(($price && $price->name == 'Elite' && $endTime) || $user->onTrial() || $userSub->onTrial())--}}
+{{--        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>--}}
+{{--        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>--}}
+{{--        <a id="submit-button" href="{{ route('elite') }}">Page 3</a>--}}
+{{--    @endif--}}
+
 </div>
 <a id="submit-button" href="{{ route('dashboard') }}">Dashboard</a>
 

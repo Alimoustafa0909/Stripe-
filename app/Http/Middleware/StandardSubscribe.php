@@ -31,6 +31,7 @@ class StandardSubscribe
 
 
         if ( $user->onTrial() ||
+            $user->subscription($productId)->onTrial() ||
             $user->subscribedToPrice($standardPlan, $productId) ||
             $user->subscribedToPrice($premiumPlan, $productId) ||
             $user->subscribedToPrice($elitePlan, $productId)) {
