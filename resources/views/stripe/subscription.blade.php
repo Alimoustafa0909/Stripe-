@@ -145,7 +145,7 @@
     </div>
 @endif
 
-@if($price && $endTime || $user->onTrial() || $user->subscription()->onTrial())
+@if($price && $endTime )
     <div class="subscription-header">
         <h3>Current Subscription Plan:</h3>
         <table id="subscription-details">
@@ -168,13 +168,17 @@
                     <td>{{ $price->interval_count }} {{ $price->interval }}</td>
                     <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>
                 @endif
-                <td>
-                    @if($user->trial_ends_at || ($user->subscription($productId) && $user->subscription($productId)->onTrial()))
-                        {{ $user->trial_ends_at ?? $user->subscription($productId)->trial_ends_at }}
-                    @else
-                        N/A
-                    @endif
-                </td>
+                    <td>
+                        @if($Trial_endTime)
+                            @if($user->trial_ends_at || ($user->subscription($productId) && $user->subscription($productId)->onTrial()))
+                                {{ $user->trial_ends_at ?? $user->subscription($productId)->trial_ends_at }}
+                            @else
+                                N/A
+                            @endif
+                        @else
+                            N/A
+                        @endif
+                    </td>
 
             </tr>
         </table>

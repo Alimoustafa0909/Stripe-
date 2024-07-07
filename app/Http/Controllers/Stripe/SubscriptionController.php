@@ -48,6 +48,14 @@ class SubscriptionController extends Controller
             }
         }
 
+        $Trial_endTime = true;
+        if ($userSub) {
+            if ($userSub->trial_ends_at && $userSub->trial_ends_at->lt(Carbon::now())) {
+                $Trial_endTime = false;
+            }
+        }
+
+
 
         return view('stripe.subscription', compact(
             'clientSecret',
@@ -58,7 +66,8 @@ class SubscriptionController extends Controller
             'price',
             'productId',
             'endTime',
-            'onTrial'
+            'onTrial',
+            'Trial_endTime'
         ));
     }
 
@@ -77,7 +86,7 @@ class SubscriptionController extends Controller
         // Check if the user has a subscription that was canceled but is still in the grace period
         $subscription = $user->subscription($productId);
 
-        if ($subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
+        if ($subscription && $subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
             // Resume the subscription
             $subscription->resume();
             return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
@@ -91,12 +100,13 @@ class SubscriptionController extends Controller
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
         }
 
-        // Check if the user is on a trial period
-        if ($user->onTrial()) {
-            $trialEndsAt = $user->trial_ends_at;
+
+//         Check if the user is on a trial period
+        if ($user->onGenericTrial()) {
+            $trialEndsAt = $user->trialEndsAt();
 
             $user->newSubscription($productId, $plan)
-                ->trialUntil($trialEndsAt)
+                ->tiralDays($trialEndsAt)
                 ->create($paymentMethod);
 
             return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
@@ -120,3 +130,17 @@ class SubscriptionController extends Controller
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

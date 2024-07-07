@@ -53,40 +53,4 @@
             </x-primary-button>
         </div>
     </form>
-
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const stripe = Stripe('{{ env('STRIPE_KEY') }}');
-            const elements = stripe.elements();
-            const cardElement = elements.create('card');
-            cardElement.mount('#card-element');
-
-            const form = document.getElementById('payment-method-form');
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const {setupIntent, error} = await stripe.confirmCardSetup(
-                    '{{ $clientSecret }}', {
-                        payment_method: {
-                            card: cardElement,
-                        }
-                    }
-                );
-
-                if (error) {
-                    console.error('Error setting up card:', error);
-                    document.getElementById('card-errors').textContent = error.message;
-                } else {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.setAttribute('type', 'hidden');
-                    hiddenInput.setAttribute('name', 'payment_method');
-                    hiddenInput.setAttribute('value', setupIntent.payment_method);
-                    form.appendChild(hiddenInput);
-
-                    form.submit();
-                }
-            });
-        });
-    </script>
 </x-guest-layout>
