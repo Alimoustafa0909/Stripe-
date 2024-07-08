@@ -17,11 +17,14 @@ class SubscriptionController extends Controller
 {
     public function showSubscriptionForm()
     {
+
         $user = auth()->user();
 
         Stripe::setApiKey(config('services.stripe.secret'));
+
         $productId = Product::latest()->first()->stripe_product_id;
 
+        $products = Product::with('plans')->get();
         if (!$productId) {
             abort(404, 'Product not found');
         }
@@ -48,15 +51,6 @@ class SubscriptionController extends Controller
             }
         }
 
-        $Trial_endTime = true;
-        if ($userSub) {
-            if ($userSub->trial_ends_at && $userSub->trial_ends_at->lt(Carbon::now())) {
-                $Trial_endTime = false;
-            }
-        }
-
-
-
         return view('stripe.subscription', compact(
             'clientSecret',
             'user',
@@ -67,7 +61,8 @@ class SubscriptionController extends Controller
             'productId',
             'endTime',
             'onTrial',
-            'Trial_endTime'
+            'userSub',
+            'products'
         ));
     }
 
@@ -100,18 +95,15 @@ class SubscriptionController extends Controller
             return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
         }
 
-
 //         Check if the user is on a trial period
         if ($user->onGenericTrial()) {
             $trialEndsAt = $user->trialEndsAt();
-
             $user->newSubscription($productId, $plan)
-                ->tiralDays($trialEndsAt)
+                ->trialUntil($trialEndsAt)
                 ->create($paymentMethod);
 
             return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
         }
-
 
         // Create a new subscription without a trial period
         $user->newSubscription($productId, $plan)

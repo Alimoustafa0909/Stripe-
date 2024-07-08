@@ -27,10 +27,11 @@ class PremiumSubscribe
         $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
         $user = $request->user();
+        $subscription = $user->subscription($productId);
 
 
         if ( $user->onTrial() ||
-            $user->subscription($productId)->onTrial() ||
+            ($subscription && $subscription->stripe_status == 'trialing') ||
             $user->subscribedToPrice($premiumPlan, $productId) ||
             $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);

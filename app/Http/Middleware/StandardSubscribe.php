@@ -28,16 +28,16 @@ class StandardSubscribe
         $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
 
         $user = $request->user();
+        $subscription = $user->subscription($productId);
 
 
-        if ( $user->onTrial() ||
-            $user->subscription($productId)->onTrial() ||
+        if ($user->onTrial() ||
+            ($subscription && $subscription->stripe_status == 'trialing') ||
             $user->subscribedToPrice($standardPlan, $productId) ||
             $user->subscribedToPrice($premiumPlan, $productId) ||
             $user->subscribedToPrice($elitePlan, $productId)) {
             return $next($request);
         }
-
         return redirect('/subscription')->withErrors('You need to subscribe to access this page.');
     }
 }
