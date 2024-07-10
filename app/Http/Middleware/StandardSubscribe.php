@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Plan;
 use App\Models\Product;
 use Closure;
 use Illuminate\Http\Request;
@@ -22,22 +21,28 @@ class StandardSubscribe
             return redirect('/login');
         }
 
-        $productId = Product::latest()->first()->stripe_product_id;
-        $standardPlan = Plan::where('name', 'Standard')->first()->stripe_plan_id;
-        $premiumPlan = Plan::where('name', 'Premium')->first()->stripe_plan_id;
-        $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
+        $standardProduct = Product::where('name', 'Standard Work')->first();
+        $premiumProduct = Product::where('name', 'Premium Work')->first();
+        $eliteProduct = Product::where('name', 'Elite Work')->first();
+
+        if (!$standardProduct || !$premiumProduct || !$eliteProduct) {
+            return redirect('/subscription')->withErrors('Subscription products not found.');
+        }
+
+        $standardProductId = $standardProduct->stripe_product_id;
+        $premiumProductId = $premiumProduct->stripe_product_id;
 
         $user = $request->user();
-        $subscription = $user->subscription($productId);
-
+        $subscription = $user->subscriptions->first();
 
         if ($user->onTrial() ||
             ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToPrice($standardPlan, $productId) ||
-            $user->subscribedToPrice($premiumPlan, $productId) ||
-            $user->subscribedToPrice($elitePlan, $productId)) {
+            $user->subscribedToProduct($standardProductId) ||
+            $user->subscribedToProduct($premiumProductId) ||
+        $user->subscribedToProduct($eliteProduct)) {
             return $next($request);
         }
+
         return redirect('/subscription')->withErrors('You need to subscribe to access this page.');
     }
 }

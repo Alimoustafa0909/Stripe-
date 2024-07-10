@@ -84,6 +84,12 @@ class SubscriptionController extends Controller
             // Check if the user has any existing subscription
             $subscription = $user->subscriptions->first();
 
+            if ($subscription && $subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
+                // Resume the subscription
+                $subscription->resume();
+                return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
+            }
+
             if ($subscription) {
                 // Check if the user is already subscribed to the same plan
                 if ($user->subscribedToPrice($plan, $subscription->type)) {
@@ -100,11 +106,11 @@ class SubscriptionController extends Controller
                 $trialEndsAt = $user->trialEndsAt();
 
                 // Ensure the trial end is in the future
-                    $user->newSubscription($productId, $plan)
-                        ->trialUntil($trialEndsAt)
-                        ->create($paymentMethod);
-                    return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
-                }
+                $user->newSubscription($productId, $plan)
+                    ->trialUntil($trialEndsAt)
+                    ->create($paymentMethod);
+                return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
+            }
 
 
             // Create a new subscription without a trial period
@@ -123,13 +129,24 @@ class SubscriptionController extends Controller
 
     public function cancelSubscription(Request $request)
     {
-        $productId = Product::latest()->first()->stripe_product_id;
-
         $user = auth()->user();
-        $user->subscription($productId)->cancel();
-        return back()->with('success', 'Subscription canceled successfully.');
 
+        // Attempt to get the user's first subscription
+        $subscription = $user->subscriptions->first();
+
+        // Check if a subscription was found
+        if ($subscription) {
+            // Cancel the subscription
+            $subscription->cancel();
+
+            // Return a success message
+            return back()->with('success', 'Subscription canceled successfully.');
+        } else {
+            // Return an error message if no subscription was found
+            return back()->with('error', 'No active subscription found.');
+        }
     }
+
 }
 
 

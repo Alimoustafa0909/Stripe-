@@ -176,16 +176,16 @@
             </tr>
             <tr>
                 @if(!$user->onTrial())
-                    <td>{{ $price->name}}</td>
+                    <td>{{ $price->product->name}}</td>
                     <td>{{ $price->amount / 100 }}$</td>
                     <td>{{ strtoupper($price->currency) }}</td>
                     <td>{{ $price->interval_count }} {{ $price->interval }}</td>
 
-{{--                    <td>{{ $user->subscription($productId)->ends_at ? ($user->subscription($productId)->ends_at) : 'N/A' }}</td>--}}
+                    <td>{{$userSub->ends_at ? $userSub->ends_at : 'N/A' }}</td>
                 @endif
                 <td>
-                    @if($user->trial_ends_at || ($user->subscription($productId) && ($user->subscription($productId)->stripe_status=='trialing')))
-                        {{ $user->trial_ends_at ?? $user->subscription($productId)->trial_ends_at }}
+                    @if($user->trial_ends_at || $userSub && $userSub->stripe_status=='trialing')
+                        {{ $user->trial_ends_at ?? $userSub->trial_ends_at }}
                     @else
                         N/A
                     @endif
@@ -195,13 +195,14 @@
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
             @csrf
             <input type="hidden" name="_method">
-            @if($user->trial_ends_at)
-                <h2>You are on Trial Mode Now Enjoy it </h2>
-{{--            @elseif(!$user->subscription($productId)->ends_at)--}}
+            @if(!$userSub->ends_at || !$userSub->onTrial() && !$endTime)
                 <button type="submit" class="cancel-button">Cancel Subscription</button>
             @endif
         </form>
     </div>
+@endif
+@if($user->onGenericTrial())
+    You are on Trial Mode Now
 @endif
 
 <div class="error-message" id="error-message"></div>
