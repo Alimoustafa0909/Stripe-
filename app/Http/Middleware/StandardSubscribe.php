@@ -21,9 +21,9 @@ class StandardSubscribe
             return redirect('/login');
         }
 
-        $standardProduct = Product::where('name', 'Standard Work')->first();
-        $premiumProduct = Product::where('name', 'Premium Work')->first();
-        $eliteProduct = Product::where('name', 'Elite Work')->first();
+        $standardProduct = Product::where('name', 'Standard')->first();
+        $premiumProduct = Product::where('name', 'Premium')->first();
+        $eliteProduct = Product::where('name', 'Elite')->first();
 
         if (!$standardProduct || !$premiumProduct || !$eliteProduct) {
             return redirect('/subscription')->withErrors('Subscription products not found.');
@@ -31,15 +31,16 @@ class StandardSubscribe
 
         $standardProductId = $standardProduct->stripe_product_id;
         $premiumProductId = $premiumProduct->stripe_product_id;
+        $eliteProductId = $eliteProduct->stripe_product_id;
 
         $user = $request->user();
         $subscription = $user->subscriptions->first();
 
         if ($user->onTrial() ||
-            ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToProduct($standardProductId) ||
+//            ($subscription && $subscription->stripe_status == 'trialing') ||
+            $user->subscribedToProduct('prod_QRGfLqnk6FBBct') ||
             $user->subscribedToProduct($premiumProductId) ||
-        $user->subscribedToProduct($eliteProduct)) {
+            $user->subscribedToProduct($eliteProductId)) {
             return $next($request);
         }
 

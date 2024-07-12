@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'trial_ends_at' => now()->addDays(2), // Set trial period here
+            'trial_ends_at' => now()->addDays(3), // Set trial period here
         ]);
 
         event(new Registered($user));
@@ -48,4 +48,6 @@ class RegisteredUserController extends Controller
 
         return redirect(route('dashboard'));
     }
+
+
 }

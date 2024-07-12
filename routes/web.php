@@ -21,6 +21,8 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
 
     Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel_subscription');
+    Route::post('/resume-subscription', [SubscriptionController::class, 'resumeSubscription'])->name('resume_subscription');
+
     Route::get('/subscription', [SubscriptionController::class, 'showSubscriptionForm'])->name('subscription');
     Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->middleware('auth');
     /* Start   Routes For= Payment-Method  Page*/
@@ -28,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/premium', 'stripe.premium')->name('premium')->middleware([PremiumSubscribe::class]);
     Route::view('/elite', 'stripe.elite')->name('elite')->middleware([EliteSubscribe::class]);
     /*End Of Payment Method Routes*/
+
 
 /* Start   Routes For= Payment-Method  Page*/
     Route::get('/payment-methods', [PaymentMethodController::class, 'index'])->name('payment-methods.index');

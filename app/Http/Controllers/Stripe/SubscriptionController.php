@@ -131,21 +131,29 @@ class SubscriptionController extends Controller
     {
         $user = auth()->user();
 
-        // Attempt to get the user's first subscription
         $subscription = $user->subscriptions->first();
 
-        // Check if a subscription was found
         if ($subscription) {
-            // Cancel the subscription
             $subscription->cancel();
-
-            // Return a success message
             return back()->with('success', 'Subscription canceled successfully.');
         } else {
-            // Return an error message if no subscription was found
             return back()->with('error', 'No active subscription found.');
         }
     }
+    public function resumeSubscription(Request $request)
+    {
+        $user = auth()->user();
+
+        $subscription = $user->subscriptions->first();
+        if ($subscription && $subscription->onGracePeriod()) {
+            $subscription->resume();
+            return back()->with(['success' => true, 'message' => 'Subscription resumed successfully!']);
+
+        } else {
+            return back()->with('error', 'No active subscription found.');
+        }
+    }
+
 
 }
 

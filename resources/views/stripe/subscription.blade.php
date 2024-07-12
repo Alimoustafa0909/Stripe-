@@ -64,16 +64,15 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 10px 20px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 18px;
+            font-size: 16px;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s ease;
             margin-top: 20px;
-            margin-right: 50px;
         }
 
         #submit-button:hover {
@@ -195,10 +194,18 @@
         <form id="cancel-subscription-form" action="{{ route('cancel_subscription') }}" method="POST">
             @csrf
             <input type="hidden" name="_method">
-            @if(!$userSub->ends_at || !$userSub->onTrial() && !$endTime)
+            @if(!$userSub->ends_at)
                 <button type="submit" class="cancel-button">Cancel Subscription</button>
             @endif
         </form>
+        <form id="cancel-subscription-form" action="{{ route('resume_subscription') }}" method="POST">
+            @csrf
+            <input type="hidden" name="_method">
+            @if($userSub->ends_at)
+                <button type="submit" id="submit-button">Resume Subscription</button>
+            @endif
+        </form>
+
     </div>
 @endif
 @if($user->onGenericTrial())
@@ -250,6 +257,24 @@
             </select>
         @else
             <div id="card-element"></div>
+
+
+                    @if(($product && $product->name =='Standard' && $endTime) || ($userSub && $userSub->onTrial()))
+                        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
+                    @endif
+
+                    @if(($price && $price->name == 'Premium' && $endTime) ||($userSub && $userSub->onTrial()))
+                        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
+                        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
+                    @endif
+
+                    @if(($price && $price->name == 'Elite' && $endTime) || $user->onTrial() ||($userSub && $userSub->onTrial()))
+                        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
+                        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
+                        <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
+                    @endif
+
+
         @endif
         <button type="submit" id="submit-button">
             Subscribe

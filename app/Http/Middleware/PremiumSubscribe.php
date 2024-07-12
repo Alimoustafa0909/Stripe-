@@ -21,8 +21,8 @@ class PremiumSubscribe
             return redirect('/login');
         }
 
-        $premiumProduct = Product::where('name', 'Premium Work')->first();
-        $eliteProduct = Product::where('name', 'Elite Work')->first();
+        $premiumProduct = Product::where('name', 'Premium')->first();
+        $eliteProduct = Product::where('name', 'Elite')->first();
 
         if (!$premiumProduct || !$eliteProduct) {
             return redirect('/subscription')->withErrors('Subscription products not found.');
@@ -41,6 +41,6 @@ class PremiumSubscribe
             return $next($request);
         }
 
-        return redirect('/subscription')->withErrors('You need to subscribe to access this page.');
+        return redirect('/subscription')->withErrors('You need to subscribe Premium to access this page.');
     }
 }

@@ -22,18 +22,24 @@ class EliteSubscribe
             return redirect('/login');
         }
 
-        $productId = Product::latest()->first()->stripe_product_id;
-        $elitePlan = Plan::where('name', 'Elite')->first()->stripe_plan_id;
+        $eliteProduct = Product::where('name', 'Elite')->first();
+
+        if (!$eliteProduct) {
+            return redirect('/subscription')->withErrors('Subscription products not found.');
+        }
+
+        $eliteProductId = $eliteProduct->stripe_product_id;
+
 
         $user = $request->user();
-        $subscription = $user->subscription($productId);
+        $subscription = $user->subscriptions->first();
 
-        if ( $user->onTrial() ||
+        if ($user->onTrial() ||
             ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToPrice($elitePlan, $productId)) {
+            $user->subscribedToProduct($eliteProductId)) {
             return $next($request);
         }
 
-        return redirect('/subscription')->withErrors('You need to subscribe to the Elite Package to access this page.');
+        return redirect('/subscription')->withErrors('You need to subscribe to Elite Package to access this page.');
     }
 }
