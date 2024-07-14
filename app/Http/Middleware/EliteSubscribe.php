@@ -23,7 +23,7 @@ class EliteSubscribe
             return redirect('/login');
         }
 
-        $eliteProduct = Product::where('name', 'Elite Work')->first();
+        $eliteProduct = Product::where('name', 'Elite')->first();
 
 
         $eliteProductId = $eliteProduct->stripe_product_id;

@@ -22,8 +22,8 @@ class PremiumSubscribe
             return redirect('/login');
         }
 
-        $premiumProduct = Product::where('name', 'Premium Work')->first();
-        $eliteProduct = Product::where('name', 'Elite Work')->first();
+        $premiumProduct = Product::where('name', 'Premium')->first();
+        $eliteProduct = Product::where('name', 'Elite')->first();
 
         $eliteProductid = $eliteProduct->stripe_product_id;
         $premiumProductId = $premiumProduct->stripe_product_id;

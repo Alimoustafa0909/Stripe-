@@ -21,9 +21,9 @@ class StandardSubscribe
             return redirect('/login');
         }
 
-        $standardProduct = Product::where('name', 'Standard Work')->first();
-        $premiumProduct = Product::where('name', 'Premium Work')->first();
-        $eliteProduct = Product::where('name', 'Elite Work')->first();
+        $standardProduct = Product::where('name', 'Standard')->first();
+        $premiumProduct = Product::where('name', 'Premium')->first();
+        $eliteProduct = Product::where('name', 'Elite')->first();
 
         if (!$standardProduct || !$premiumProduct) {
             return redirect('/subscription')->withErrors('Subscription products not found.');

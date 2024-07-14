@@ -83,40 +83,30 @@ class SubscriptionController extends Controller
             // Check if the user has any existing subscription
             $subscription = $user->subscriptions->first();
 
-            if ($subscription && $subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
-                // Resume the subscription
-                $subscription->resume();
-                return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
-            }
 
-            elseif ($subscription) {
+
+           if ($subscription && $subscription->stripe_price === $plan && $subscription->onGracePeriod()) {
+               // Resume the subscription
+               $subscription->resume();
+               return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
+           } elseif ($subscription) {
                 // Check if the user is already subscribed to the same plan
                 if ($user->subscribedToPrice($plan, $subscription->type)) {
                     return response()->json(['error' => 'You are already subscribed to this plan. You can select another plan.'], 400);
                 }
 
-                // If the subscription is canceled, delete it
-                elseif ($subscription->stripe_status == 'canceled') {
-                    $subscription->delete();
-                    $user->newSubscription($productId, $plan)->create($paymentMethod);
-                    return response()->json(['success' => true, 'message' => 'Subscription created successfully!']);
-                }
-
-                // Swap the existing subscription to the new plan
                 $subscription->swap($plan);
                 return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
             }
 
-            // Check if the user is on a trial period
-            elseif ($user->onGenericTrial()) {
-                $trialEndsAt = $user->trialEndsAt();
+               elseif ($user->onGenericTrial() || $subscription->stripe_status == 'canceled') {
+                   $trialEndsAt = $user->trialEndsAt();
 
-                // Ensure the trial end is in the future
-                $user->newSubscription($productId, $plan)
-                    ->trialUntil($trialEndsAt)
-                    ->create($paymentMethod);
-                return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
-            }
+                   $user->newSubscription($productId, $plan)
+                       ->trialUntil($trialEndsAt)
+                       ->create($paymentMethod);
+                   return response()->json(['success' => true, 'message' => 'Subscription created']);
+               }
 
             // Create a new subscription without a trial period
             $user->newSubscription($productId, $plan)
@@ -146,6 +136,7 @@ class SubscriptionController extends Controller
             return back()->with('error', 'No active subscription found.');
         }
     }
+
     public function resumeSubscription(Request $request)
     {
         $user = auth()->user();
