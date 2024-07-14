@@ -18,25 +18,23 @@ class EliteSubscribe
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = auth()->user();
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        $eliteProduct = Product::where('name', 'Elite')->first();
+        $eliteProduct = Product::where('name', 'Elite Work')->first();
 
-        if (!$eliteProduct) {
-            return redirect('/subscription')->withErrors('Subscription products not found.');
-        }
 
         $eliteProductId = $eliteProduct->stripe_product_id;
 
 
-        $user = $request->user();
+
         $subscription = $user->subscriptions->first();
 
         if ($user->onTrial() ||
             ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToProduct($eliteProductId)) {
+            $user->subscribedToProduct($eliteProductId,$eliteProductId)) {
             return $next($request);
         }
 

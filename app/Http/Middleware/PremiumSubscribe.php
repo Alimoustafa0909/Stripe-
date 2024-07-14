@@ -17,16 +17,13 @@ class PremiumSubscribe
      */
     public function handle(Request $request, Closure $next): Response
     {
+
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        $premiumProduct = Product::where('name', 'Premium')->first();
-        $eliteProduct = Product::where('name', 'Elite')->first();
-
-        if (!$premiumProduct || !$eliteProduct) {
-            return redirect('/subscription')->withErrors('Subscription products not found.');
-        }
+        $premiumProduct = Product::where('name', 'Premium Work')->first();
+        $eliteProduct = Product::where('name', 'Elite Work')->first();
 
         $eliteProductid = $eliteProduct->stripe_product_id;
         $premiumProductId = $premiumProduct->stripe_product_id;
@@ -36,8 +33,8 @@ class PremiumSubscribe
 
         if ($user->onTrial() ||
             ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToProduct($premiumProductId) ||
-            $user->subscribedToProduct($eliteProductid)) {
+            $user->subscribedToProduct($premiumProductId,$premiumProductId) ||
+            $user->subscribedToProduct($eliteProductid,$eliteProductid)) {
             return $next($request);
         }
 

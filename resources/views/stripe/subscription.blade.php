@@ -216,26 +216,25 @@
 <div class="success-message" id="success-message"></div>
 <div class="product-container">
     @foreach($products as $product)
-
         <div class="card">
             <h2>Product: {{ $product->name }}</h2>
             <p>Description: {{ $product->description }}</p>
             <div>
-                <input type="radio" id="product-{{ $product->id }}" name="product" value="{{ $product->id }}"
-                       data-product-id="{{ $product->id }}">
-                <label for="product-{{ $product->id }}">Select {{ $product->name }}</label>
-                <select id="plan-{{ $product->id }}" name="plan-{{ $product->id }}">
+                <input type="radio" id="product-{{ $product->stripe_product_id }}" name="product" value="{{ $product->stripe_product_id }}"
+                       data-product-id="{{ $product->stripe_product_id }}">
+                <label for="product-{{ $product->stripe_product_id }}">Select {{ $product->name }}</label>
+                <select id="plan-{{ $product->stripe_product_id }}" name="plan-{{ $product->stripe_product_id }}">
                     @foreach($product->plans as $plan)
                         <option value="{{ $plan->stripe_plan_id }}" data-plan-name="{{ $plan->name }}">
                             {{$plan->name}}  {{ $plan->amount / 100 }} {{ strtoupper($plan->currency) }}
                             / {{ $plan->interval_count }}   {{ $plan->interval }}
                         </option>
                     @endforeach
-
                 </select>
             </div>
         </div>
     @endforeach
+
 </div>
 
 

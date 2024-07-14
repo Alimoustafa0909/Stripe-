@@ -13,7 +13,7 @@ class StandardSubscribe
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\Http\Foundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\Http\Foundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -21,11 +21,11 @@ class StandardSubscribe
             return redirect('/login');
         }
 
-        $standardProduct = Product::where('name', 'Standard')->first();
-        $premiumProduct = Product::where('name', 'Premium')->first();
-        $eliteProduct = Product::where('name', 'Elite')->first();
+        $standardProduct = Product::where('name', 'Standard Work')->first();
+        $premiumProduct = Product::where('name', 'Premium Work')->first();
+        $eliteProduct = Product::where('name', 'Elite Work')->first();
 
-        if (!$standardProduct || !$premiumProduct || !$eliteProduct) {
+        if (!$standardProduct || !$premiumProduct) {
             return redirect('/subscription')->withErrors('Subscription products not found.');
         }
 
@@ -37,10 +37,11 @@ class StandardSubscribe
         $subscription = $user->subscriptions->first();
 
         if ($user->onTrial() ||
-//            ($subscription && $subscription->stripe_status == 'trialing') ||
-            $user->subscribedToProduct('prod_QRGfLqnk6FBBct') ||
-            $user->subscribedToProduct($premiumProductId) ||
-            $user->subscribedToProduct($eliteProductId)) {
+            $user->subscribedToProduct($standardProductId,$standardProductId) ||
+            $user->subscribedToProduct($premiumProductId,$premiumProductId) ||
+            $user->subscribedToProduct($eliteProductId,$eliteProductId) ||
+            ($subscription && $subscription->stripe_status == 'trialing'))
+            {
             return $next($request);
         }
 

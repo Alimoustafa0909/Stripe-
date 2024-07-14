@@ -75,7 +75,6 @@ class SubscriptionController extends Controller
             $plan = $request->input('plan'); // Get the plan ID from the request
             $paymentMethod = $request->payment_method;
 
-
             Stripe::setApiKey(config('services.stripe.secret'));
 
             $user->createOrGetStripeCustomer();
@@ -90,10 +89,17 @@ class SubscriptionController extends Controller
                 return response()->json(['success' => true, 'message' => 'Subscription resumed successfully!']);
             }
 
-            if ($subscription) {
+            elseif ($subscription) {
                 // Check if the user is already subscribed to the same plan
                 if ($user->subscribedToPrice($plan, $subscription->type)) {
                     return response()->json(['error' => 'You are already subscribed to this plan. You can select another plan.'], 400);
+                }
+
+                // If the subscription is canceled, delete it
+                elseif ($subscription->stripe_status == 'canceled') {
+                    $subscription->delete();
+                    $user->newSubscription($productId, $plan)->create($paymentMethod);
+                    return response()->json(['success' => true, 'message' => 'Subscription created successfully!']);
                 }
 
                 // Swap the existing subscription to the new plan
@@ -101,8 +107,8 @@ class SubscriptionController extends Controller
                 return response()->json(['success' => true, 'message' => 'Subscription plan swapped successfully!']);
             }
 
-//             Check if the user is on a trial period
-            if ($user->onGenericTrial()) {
+            // Check if the user is on a trial period
+            elseif ($user->onGenericTrial()) {
                 $trialEndsAt = $user->trialEndsAt();
 
                 // Ensure the trial end is in the future
@@ -111,7 +117,6 @@ class SubscriptionController extends Controller
                     ->create($paymentMethod);
                 return response()->json(['success' => true, 'message' => 'Subscription created and will start after the trial period ends!']);
             }
-
 
             // Create a new subscription without a trial period
             $user->newSubscription($productId, $plan)
@@ -126,6 +131,7 @@ class SubscriptionController extends Controller
             return response()->json(['error' => 'An error occurred while processing your subscription. Please try again later.'], 500);
         }
     }
+
 
     public function cancelSubscription(Request $request)
     {
