@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Events\WebhookReceived;
 use App\Models\Product;
+use Laravel\Cashier\Subscription;
 
 class StripeEventListener
 {
@@ -124,6 +125,29 @@ class StripeEventListener
             $payment->save();
 
             // You can add more conditions based on different webhook types
+        }
+        elseif ($payload['type'] === 'customer.subscription.updated') {
+
+            $stripeSubscriptionId = $productData['id'];
+            $newProductId = $productData['items']['data'][0]['plan']['product'];
+
+            Log::info('Updating subscription type', [
+                'stripe_subscription_id' => $stripeSubscriptionId,
+                'new_product_id' => $newProductId
+            ]);
+
+            // Find the subscription by its stripe_id
+            $subscription = Subscription::where('stripe_id', $stripeSubscriptionId)->first();
+
+            if ($subscription) {
+                // Update the type field with the new product ID
+                $subscription->type = $newProductId;
+                $subscription->save();
+
+                Log::info('Subscription type updated successfully', ['subscription_id' => $subscription->id]);
+            } else {
+                Log::warning('Subscription not found', ['stripe_subscription_id' => $stripeSubscriptionId]);
+            }
         }
     }
 }

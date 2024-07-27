@@ -257,22 +257,11 @@
         @else
             <div id="card-element"></div>
         @endif
-@foreach($products as $product)
-            @if(($product && $product->name =='Standard' && $endTime) || ($userSub && $userSub->onTrial()))
-                <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-            @endif
-
-            @if(($product && $product->name == 'Premium' && $endTime) ||($userSub && $userSub->onTrial()))
-                <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-                <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-            @endif
-
-            @if(($product && $product->name == 'Elite' && $endTime) || $user->onTrial() ||($userSub && $userSub->onTrial()))
-                <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
-                <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
-                <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
-            @endif
-            @endforeach
+                    @if(($price && $price->name == 'Elite' && $endTime) || $user->onTrial() || $userSub->onTrial())
+                        <a id="submit-button" href="{{ route('standard') }}">Page 1</a>
+                        <a id="submit-button" href="{{ route('premium') }}">Page 2</a>
+                        <a id="submit-button" href="{{ route('elite') }}">Page 3</a>
+                    @endif
         <button type="submit" id="submit-button">
             Subscribe
             <i class="fa fa-spinner fa-spin loading-spinner" id="loading-spinner"></i>

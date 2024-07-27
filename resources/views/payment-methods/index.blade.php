@@ -61,13 +61,29 @@
     <thead>
     <tr>
         <th>Payment Method</th>
+        <th>Type</th>
         <th>Default</th>
+
     </tr>
     </thead>
     <tbody>
     @foreach ($paymentMethods as $paymentMethod)
         <tr>
-            <td>{{ $paymentMethod->stripe_payment_method_id }}</td>
+            <td>****************{{ $paymentMethod->pm_last_four }}</td>
+            <td>
+                @if (strtolower($paymentMethod->pm_type) == 'visa')
+                    <img class="img-fluid" src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa"/>
+                @elseif (strtolower($paymentMethod->pm_type) == 'mastercard')
+                    <img class="img-fluid" src="https://img.icons8.com/color/48/000000/mastercard-logo.png" alt="MasterCard"/>
+                @elseif (strtolower($paymentMethod->pm_type) == 'american express')
+                    <img class="img-fluid" src="https://img.icons8.com/color/48/000000/amex.png" alt="American Express"/>
+                @elseif (strtolower($paymentMethod->pm_type) == 'unionpay')
+                    <img class="img-fluid" src="https://img.icons8.com/color/48/000000/unionpay.png" alt="UnionPay"/>
+                @else
+                    <img class="img-fluid" src="https://img.icons8.com/color/48/000000/default.png" alt="Default"/>
+                @endif
+                {{ ucfirst($paymentMethod->pm_type) }}
+            </td>
             <td>
                 {{ $paymentMethod->default ? 'Default' : '' }}
 
@@ -81,8 +97,7 @@
             </td>
         </tr>
     @endforeach
-    </tbody>
-</table>
+    </tbody></table>
 
 <h2>Add Payment Method</h2>
 <form id="payment-method-form">
@@ -126,7 +141,10 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = '{{ route('payment-methods.index') }}';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+
                 } else {
                     console.error('Error adding payment method:', result.error);
                 }
